@@ -1,0 +1,19 @@
+# See the OWNERS docs: https://git.k8s.io/community/contributors/guide/owners.md
+# This file should be kept in sync with k/org.
+
+aliases:
+  # Reference: https://github.com/kubernetes/org/blob/main/OWNERS_ALIASES
+  sig-network-leads:
+    - aojea
+    - danwinship
+    - mikezappa87
+    - shaneutt
+    - thockin
+
+  ingate-maintainers: 
+    - cpanato
+    - gacko
+    - puerco
+    - rikatz
+    - strongjz
+    - tao12345666333

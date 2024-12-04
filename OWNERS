@@ -1,9 +1,5 @@
 # See the OWNERS docs at https://go.k8s.io/owners
 
 approvers:
-  - cpanato
-  - gacko
-  - puerco
-  - rikatz
-  - strongjz
-  - tao12345666333
+  - sig-network-leads
+  - ingate-maintainers
