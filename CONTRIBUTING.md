@@ -25,6 +25,6 @@ Custom Information - if you're copying this template for the first time you can 
 
 ## Contact Information
 
-- [Slack channel](https://kubernetes.slack.com/messages/kubernetes-users) - Replace `kubernetes-users` with your slack channel string, this will send users directly to your channel. 
+- [Slack channel](https://kubernetes.slack.com/messages/kubernetes-users) - Replace `kubernetes-users` with your slack channel string, this will send users directly to your channel.
 - [Mailing list](URL)
 -->
