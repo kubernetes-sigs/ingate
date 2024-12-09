@@ -2,7 +2,7 @@
 
 ## Overview
 
- InGate is an Ingress and Gateway API Controller for Kubernetes.
+InGate is an Ingress and Gateway API Controller for Kubernetes.
 
 Learn more about [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress) and [Gateway API](https://kubernetes.io/docs/concepts/services-networking/gateway) on the Kubernetes documentation site.
 
@@ -20,6 +20,3 @@ While we are in transition, we are still using the Ingress NGINX Slack channels 
 ### Code of conduct
 
 Participation in the Kubernetes community is governed by the [Kubernetes Code of Conduct](code-of-conduct.md).
-
-[owners]: https://git.k8s.io/community/contributors/guide/owners.md
-[Creative Commons 4.0]: https://git.k8s.io/website/LICENSE
