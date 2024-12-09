@@ -24,14 +24,14 @@ readonly REPO_ROOT
 
 VERSION=0.2.5
 URL_BASE=https://raw.githubusercontent.com/kubernetes/repo-infra
-URL=$URL_BASE/$VERSION/hack/verify_boilerplate.py
+URL="$URL_BASE/v${VERSION}/hack/verify_boilerplate.py"
 BIN_DIR=${REPO_ROOT}/hack/bin
 SCRIPT=${BIN_DIR}/verify_boilerplate.py
 
 if [[ ! -f $SCRIPT ]]; then
-  mkdir -p $BIN_DIR
-  curl -sfL $URL -o $SCRIPT
-  chmod +x $SCRIPT
+  mkdir -p "${BIN_DIR}"
+  curl -sfL "${URL}" -o "${SCRIPT}"
+  chmod +x "${SCRIPT}"
 fi
 
 "${SCRIPT}" --boilerplate-dir "${REPO_ROOT}/hack/boilerplate" --rootdir "${REPO_ROOT}"
