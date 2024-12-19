@@ -1,5 +1,8 @@
 # See the OWNERS docs: https://www.kubernetes.dev/docs/guide/owners
 
 approvers:
-  - sig-network-leads
-  - ingate-maintainers
+- sig-network-leads
+- ingate-maintainers
+
+reviewers:
+- ingate-reviewers
