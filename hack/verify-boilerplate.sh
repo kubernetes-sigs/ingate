@@ -14,24 +14,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -o errexit
-set -o nounset
-set -o pipefail
-set -o xtrace
+# Exit on error.
+set -o errexit -o nounset -o pipefail
 
-REPO_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)
-readonly REPO_ROOT
+# Get root.
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 
-VERSION=0.2.5
-URL_BASE=https://raw.githubusercontent.com/kubernetes/repo-infra
-URL="$URL_BASE/v${VERSION}/hack/verify_boilerplate.py"
-BIN_DIR=${REPO_ROOT}/hack/bin
-SCRIPT=${BIN_DIR}/verify_boilerplate.py
+# Define script.
+script="${root}/hack/verify_boilerplate.py"
 
-if [[ ! -f $SCRIPT ]]; then
-  mkdir -p "${BIN_DIR}"
-  curl -sfL "${URL}" -o "${SCRIPT}"
-  chmod +x "${SCRIPT}"
+# Check script.
+if [[ ! -f "${script}" ]]
+then
+  # Define version and URL.
+  version="v0.2.5"
+  url="https://raw.githubusercontent.com/kubernetes/repo-infra/${version}/hack/verify_boilerplate.py"
+
+  # Download script.
+  curl --silent --show-error --fail "${url}" --location --output "${script}"
+
+  # Make executable.
+  chmod +x "${script}"
 fi
 
-"${SCRIPT}" --boilerplate-dir "${REPO_ROOT}/hack/boilerplate" --rootdir "${REPO_ROOT}"
+# Run script.
+"${script}" --boilerplate-dir "${root}/hack/boilerplate" --rootdir "${root}"
