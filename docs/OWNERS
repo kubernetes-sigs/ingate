@@ -1,0 +1,7 @@
+# See the OWNERS docs: https://www.kubernetes.dev/docs/guide/owners
+
+approvers:
+- ingate-docs-maintainers
+
+labels:
+- area/docs
