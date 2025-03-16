@@ -7,12 +7,6 @@ repo_url: https://github.com/kubernetes-sigs/ingate
 theme:
   name: material
 
-  features:
-    - navigation.tabs
-    - navigation.tabs.sticky
-    - navigation.instant
-    - navigation.sections
-
   palette:
     primary: indigo
     scheme: slate
