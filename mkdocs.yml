@@ -22,6 +22,5 @@ theme:
 
 nav:
   - Welcome: index.md
-  - Contributing:
-    - Getting Started: contributing/getting-started.md
+  - Contributing: contributing.md
   - FAQ: faq.md
