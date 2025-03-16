@@ -1,1 +1,1 @@
-# Contributing to Ingate
+# Contributing to InGate
