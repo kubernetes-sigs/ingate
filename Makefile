@@ -97,17 +97,18 @@ clean-image: ## Removes local image
 
 VERSION_PACKAGE := github.com/kubernetes-sigs/ingate/internal/cmd/version
 
-GO_LDFLAGS += -X $(VERSION_PACKAGE).InGateVersion=$(INGATE_VERSION) \
-	-X $(VERSION_PACKAGE).gitCommitID=$(COMMIT_SHA)
-
 TARGETS_DIR := "images/ingate-controller/bin/${ARCH}"
 
 PLATFORMS ?= amd64 arm arm64
 
 .PHONY: go.build
-
 go.build: ## Build go binary for InGate
-	CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) go build -o $(TARGETS_DIR)/ingate -ldflags "$(GO_LDFLAGS)" $(PKG)/cmd/ingate
+	CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) go build -trimpath -ldflags="-buildid= -w -s \
+  -X ${PKG}/version.RELEASE=${TAG} \
+  -X ${PKG}/version.COMMIT=${COMMIT_SHA} \
+  -X ${PKG}/version.REPO=${REPO_INFO}" \
+  -buildvcs=false \
+  -o "${TARGETS_DIR}/ingate" "${PKG}/cmd/ingate"
 
 .PHONY: go.test.unit
 go.test.unit: ## Run go unit tests
