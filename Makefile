@@ -30,7 +30,7 @@ ROOT_DIR := $(abspath $(shell pwd -P))
 endif
 
 # Golang root package
-PKG=github.com/kubernetes-sigs/ingate
+PKG = github.com/kubernetes-sigs/ingate
 # Ingate version building
 INGATE_VERSION=$(shell cat versions/INGATE)
 # Golang version to build controller and container
