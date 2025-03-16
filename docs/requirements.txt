@@ -1,4 +1,0 @@
-mkdocs-material==9.6
-mkdocs-awesome-pages-plugin==2.9.2
-mkdocs-minify-plugin==0.7.1
-mkdocs-redirects==1.2.1
