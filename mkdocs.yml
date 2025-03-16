@@ -1,50 +1,12 @@
-site_name: Ingate Controller
-repo_name: "kubernetes-sigs/ingate"
-repo_url: https://github.com/kubernetes-sigs/inate
+site_name: InGate
 site_url: https://kubernetes-sigs.github.io/ingate
-edit_uri: edit/main/docs/
 
-# Extensions
-markdown_extensions:
-  - admonition
-  - abbr
-  - attr_list
-  - def_list
-  - footnotes
-  - meta
-  - md_in_html
-  - toc:
-      # insert a blank space before the character
-      permalink: " ¶"
-  - pymdownx.arithmatex:
-      generic: true
-  - pymdownx.betterem:
-      smart_enable: all
-  - pymdownx.caret
-  - pymdownx.critic
-  - pymdownx.details
-  - pymdownx.emoji:
-      emoji_index: !!python/name:materialx.emoji.twemoji
-      emoji_generator: !!python/name:materialx.emoji.to_svg
-  - pymdownx.highlight
-  - pymdownx.inlinehilite
-  - pymdownx.keys
-  - pymdownx.mark
-  - pymdownx.smartsymbols
-  - pymdownx.snippets:
-      check_paths: true
-  - pymdownx.superfences:
-      custom_fences:
-        - name: mermaid
-          class: mermaid
-          format: !!python/name:pymdownx.superfences.fence_code_format
-  - pymdownx.tabbed
-  - pymdownx.tasklist:
-      custom_checkbox: true
-  - pymdownx.tilde
+repo_name: kubernetes-sigs/ingate
+repo_url: https://github.com/kubernetes-sigs/ingate
 
 theme:
   name: material
+
   features:
     - navigation.tabs
     - navigation.tabs.sticky
@@ -55,18 +17,11 @@ theme:
     primary: indigo
     scheme: slate
     accent: light green
+
   include_sidebar: true
 
-plugins:
-  - search
-  - awesome-pages
-  - minify:
-      minify_html: true
-
 nav:
-  - Welcome:
-      - Getting Started: "index.md"
-
+  - Welcome: index.md
   - Contributing:
-      - Getting Started: "contributing/getting-started.md"
-  - FAQ: "faq.md"
+    - Getting Started: contributing/getting-started.md
+  - FAQ: faq.md
