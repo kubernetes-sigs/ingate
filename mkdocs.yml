@@ -63,9 +63,6 @@ plugins:
   - minify:
       minify_html: true
 
-extra_css: [extra.css]
-
-
 nav:
   - Welcome:
       - Getting Started: "index.md"
