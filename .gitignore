@@ -1,2 +1,3 @@
 # Downloaded in hack/verify-boilerplate.sh.
 hack/verify_boilerplate.py
+images/ingate-controller/bin/

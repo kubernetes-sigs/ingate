@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github/kubernetes-sigs/ingate/cmd/ingate/root"
 	"os"
+
+	"github.com/kubernetes-sigs/ingate/cmd/ingate/root"
 )
 
 func main() {

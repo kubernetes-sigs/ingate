@@ -1,7 +1,7 @@
 package root
 
 import (
-	"github/kubernetes-sigs/ingate/internal/cmd"
+	"github.com/kubernetes-sigs/ingate/internal/cmd"
 
 	"github.com/spf13/cobra"
 )

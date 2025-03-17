@@ -1,4 +1,4 @@
-module github/kubernetes-sigs/ingate
+module github.com/kubernetes-sigs/ingate
 
 go 1.24.1
 

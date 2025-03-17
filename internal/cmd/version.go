@@ -12,7 +12,7 @@ func GetVersionCommand() *cobra.Command {
 		Aliases: []string{"versions", "v"},
 		Short:   "Show versions",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return version.Print()
+			return version.Print(cmd.OutOrStdout())
 		},
 	}
 
