@@ -1,4 +1,6 @@
-# Copyright 2025 The Kubernetes Authors. All rights reserved.
+#!/usr/bin/env bash
+
+# Copyright 2025 The Kubernetes Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,14 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ARG GOLANG_VERSION
-ARG ALPINE_VERSION
-ARG TARGETARCH
-ARG BASE_IMAGE
+# Exit on error.
+set -o errexit -o nounset -o pipefail
 
-FROM ${BASE_IMAGE}
-
-WORKDIR  /opt/ingate
-
-COPY  bin/${TARGETARCH}/ingate /
-CMD ["/ingate"]
+# Get root.
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
