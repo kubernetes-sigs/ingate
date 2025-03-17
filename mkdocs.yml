@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 site_name: InGate
 site_url: https://kubernetes-sigs.github.io/ingate
 
@@ -6,11 +7,66 @@ repo_url: https://github.com/kubernetes-sigs/ingate
 
 theme:
   name: material
+=======
+site_name: Ingate Controller
+repo_name: "kubernetes-sigs/ingate"
+repo_url: https://github.com/kubernetes-sigs/inate
+site_url: https://kubernetes-sigs.github.io/ingate
+edit_uri: edit/main/docs/
+
+# Extensions
+markdown_extensions:
+  - admonition
+  - abbr
+  - attr_list
+  - def_list
+  - footnotes
+  - meta
+  - md_in_html
+  - toc:
+      # insert a blank space before the character
+      permalink: " ¶"
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.critic
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.snippets:
+      check_paths: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.instant
+    - navigation.sections
+>>>>>>> b811a28 (add docs skeleton site)
 
   palette:
     primary: indigo
     scheme: slate
     accent: light green
+<<<<<<< HEAD
 
   include_sidebar: true
 
@@ -18,3 +74,25 @@ nav:
   - Welcome: index.md
   - Contributing: contributing.md
   - FAQ: faq.md
+=======
+  include_sidebar: true
+
+plugins:
+  - search
+  - awesome-pages
+  - minify:
+      minify_html: true
+
+extra_css: [extra.css]
+
+
+nav:
+  - Welcome:
+      - Getting Started: "index.md"
+
+  - Contributing:
+      - Getting Started: "contributing/getting-started.md"
+      - Contributor Ladder: "contributing/ladder.md"
+      - Code of Conduct: "contributing/code-of-conduct.md" 
+  - FAQ: "faq.md"
+>>>>>>> b811a28 (add docs skeleton site)
