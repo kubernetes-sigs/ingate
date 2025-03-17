@@ -80,22 +80,22 @@ docker.build: clean-image ## Build image for a particular arch.
 		${PLATFORM_FLAG} ${PLATFORM} \
 		--no-cache \
 		--build-arg BASE_IMAGE="$(BASE_IMAGE)" \
-		--build-arg VERSION="$(TAG)" \
+		--build-arg VERSION="$(INGATE_VERSION)" \
 		--build-arg TARGETARCH="$(ARCH)" \
 		--build-arg COMMIT_SHA="$(COMMIT_SHA)" \
 		--build-arg BUILD_ID="$(BUILD_ID)" \
-		-t $(REGISTRY)/controller:$(TAG) image/ingate-controller
+		-t $(REGISTRY)/controller:$(INGATE_VERSION) image/ingate-controller
 
 .PHONY: docker.clean
 docker.clean: ## Removes local image
-	echo "removing old image $(REGISTRY)/controller:$(TAG)"
-	@docker rmi -f $(REGISTRY)/controller:$(TAG) || true
+	echo "removing old image $(REGISTRY)/controller:$(INGATE_VERSION)"
+	@docker rmi -f $(REGISTRY)/controller:$(INGATE_VERSION) || true
 
 
 ## All Make targets for golang
 
 # Where to place the golang built binarys
-TARGETS_DIR := "images/ingate-controller/bin/${ARCH}"
+TARGETS_DIR := "./images/ingate-controller/bin/${ARCH}"
 
 # Supported Platforms for building multiarch binaries.
 PLATFORMS ?= darwin_amd64 darwin_arm64 linux_amd64 linux_arm64
@@ -110,14 +110,15 @@ ifeq ($(origin GOOS), undefined)
 		GOOS := $(shell go env GOOS)
 endif
 
+VERSION_PACKAGE := github.com/kubernetes-sigs/ingate/internal/cmd/version
+
 .PHONY: go.build
 go.build: ## Build go binary for InGate
 	CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(ARCH) go build -trimpath -ldflags="-buildid= -w -s \
-  -X ${PKG}/version.RELEASE=${TAG} \
-  -X ${PKG}/version.COMMIT=${COMMIT_SHA} \
-  -X ${PKG}/version.REPO=${REPO_INFO}" \
+  -X $(VERSION_PACKAGE).inGateVersion=$(INGATE_VERSION) \
+  -X $(VERSION_PACKAGE).gitCommitID=$(COMMIT_SHA)" \
   -buildvcs=false \
-  -o "${TARGETS_DIR}/ingate" "${PKG}/cmd/ingate"
+  -o "$(TARGETS_DIR)/ingate" "$(PKG)/cmd/ingate"
 
 .PHONY: go.clean
 go.clean: ## Clean go building output files
