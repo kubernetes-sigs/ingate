@@ -15,4 +15,5 @@
 FROM gcr.io/distroless/base-debian12:latest
 ARG TARGET_ARCH
 COPY  bin/${TARGET_ARCH}/ingate /opt/ingate
+ENTRYPOINT ["/opt/ingate"]
 CMD ["/opt/ingate"]

@@ -40,16 +40,16 @@ GOLANG=$(shell cat versions/GOLANG)
 HOST_ARCH=$(shell which go >/dev/null 2>&1 && go env GOARCH)
 ARCH ?= $(HOST_ARCH)
 ifeq ($(ARCH),)
-    $(error mandatory variable ARCH is empty, either set it when calling the command or make sure 'go env GOARCH' works)
+	$(error mandatory variable ARCH is empty, either set it when calling the command or make sure 'go env GOARCH' works)
 endif
 
-## Build information for the repo source
+# Build information for the repo source
 REPO_INFO ?= $(shell git config --get remote.origin.url)
 
-## Build information for git commit 
+# Build information for git commit 
 COMMIT_SHA ?= git-$(shell git rev-parse --short HEAD)
 
-## Build information for build id in cloud build
+# Build information for build id in cloud build
 BUILD_ID ?= "UNSET"
 
 # REGISTRY is the image registry to use for build and push image targets.
@@ -60,9 +60,9 @@ INGATE_IMAGE_NAME ?= ingate-controller
 IMAGE ?= $(REGISTRY)/$(IMAGE_NAME)
 BASE_IMAGE ?= $(shell cat versions/BASE_IMAGE)
 
-## help: Show this help info.
-.PHONY: help
-help:
+
+.PHONY: help 
+help: ## help: Show this help info.
 	@awk 'BEGIN {FS = ":.*##"; printf ""} /^[a-zA-Z_0-9-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
 
@@ -75,7 +75,7 @@ versions: ## List out versions of Software being used to develop InGate
 	echo "HOST_ARCH: ${ARCH}"
 
 
-## All Make targets for docker build
+# All Make targets for docker build
 
 # Name of the docker buildx builder for InGate
 BUILDER ?= ingate
@@ -83,16 +83,25 @@ BUILDER ?= ingate
 # Supported Platforms for building multiarch binaries.
 PLATFORMS ?= linux/amd64,linux/arm,linux/arm64
 
-.PHONY: builder
-docker.builder:
+.PHONY: docker.build
+docker.build: ## Build a local docker container for InGate
+	docker build \
+		--platform=$(PLATFORMS) \
+		--no-cache \
+		--build-arg TARGET_ARCH=$(ARCH) \
+		-t $(REGISTRY)/controller:$(INGATE_VERSION) \
+		-f images/ingate-controller/Dockerfile.run images/ingate-controller
+
+.PHONY: docker.builder
+docker.builder: ## Create buildx for multi-platform builds
 	docker buildx create --name $(BUILDER) --bootstrap --use || :
 	docker buildx inspect $(BUILDER)
 
-## Docker output, --push or --load 
+# Docker output, --push or --load 
 OUTPUT ?=
 
-.PHONY: docker.build
-docker.build: docker.builder docker.clean ## Build Ingate Controller image for a particular arch.
+.PHONY: docker.buildx
+docker.buildx: docker.builder docker.clean ## Build Ingate Controller image for a particular arch.
 	echo "Building docker $(REGISTRY)/controller:$(INGATE_VERSION) ($(ARCH))..."
 	docker buildx build \
 		--builder $(BUILDER) \
@@ -118,12 +127,12 @@ docker.registry: ## Starts a local docker registry for testing
 	docker stop registry && docker rm registry || true
 	docker run -d --publish "0.0.0.0:6000:5000" --name registry registry:2.7
 
-## All Make targets for golang
+# All Make targets for golang
 
 # Where to place the golang built binarys
 TARGETS_DIR = "./images/ingate-controller/bin/${ARCH}"
 
-## Where to get the version information 
+# Where to get the version information 
 VERSION_PACKAGE = github.com/kubernetes-sigs/ingate/internal/cmd/version
 
 GOOS := $(shell go env GOOS)
@@ -154,35 +163,43 @@ go.clean: ## Clean go building output files
 go.test.unit: ## Run go unit tests
 	docker run -e CGO_ENABLED=1 golang:1.24.1-alpine3.21 go test -race ./...		
 
-## All make targets for deploying a dev environment for InGate development
+# All make targets for deploying a dev environment for InGate development
 
 # Version of kubernetes to deploy on kind cluster
 K8S_VERSION ?= $(shell cat versions/KUBERNETES_VERSIONS | head -n1)
 # Name of kind cluster to deploy
-KIND_CLUSTER_NAME := ingate-dev
+KIND_CLUSTER_NAME ?= ingate-dev
 # Gateway API Version to deploy on kind cluster
 GW_VERSION ?= $(shell cat versions/GATEWAY_API)
 # Gateway API channel to deploy on kind cluster See https://gateway-api.sigs.k8s.io/concepts/versioning/?h=chann#release-channels for more details 
 GW_CHANNEL ?= standard
 
-kind.all: kind.build go.build docker.build kind.load loadbalancer.install gateway.install ## Start a Development environment for InGate
+.PHONY: kind.all
+kind.all: kind.build go.build docker.build kind.load lb.install gateway.install ## Start a Development environment for InGate
 
-kind.build: kind.clean ## Build a kind cluster for testing
-	kind create cluster --config tools/kind/config.yaml --name $(KIND_CLUSTER_NAME)   --image "kindest/node:$(K8S_VERSION)"
+.PHONY: kind.build
+kind.build: kind.clean ## Build a kind cluster for testing InGate development
+	kind create cluster --config tools/kind/config.yaml --name $(KIND_CLUSTER_NAME) --image "kindest/node:$(K8S_VERSION)"
 
-kind.clean: ## Deletes kind cluster 
+.PHONY: kind.clean
+kind.clean: ## Deletes InGate-dev kind cluster 
 	kind delete clusters $(KIND_CLUSTER_NAME) 
 
-KIND_WORKERS=$(shell kind get nodes --name="${KIND_CLUSTER_NAME}" | grep worker | awk '{printf (NR>1?",":"") $1}')
-
+.PHONY: kind.load
 kind.load: ## Load InGate Image onto kind cluster
-	kind load docker-image --name="$(KIND_CLUSTER_NAME)" --nodes="$(KIND_WORKERS)" "$(REGISTRY)"/controller:"$(TAG)"
+	kind load docker-image --name="$(KIND_CLUSTER_NAME)" "$(REGISTRY)"/controller:"$(INGATE_VERSION)"
 
-## Using the kubernetes sig tool https://github.com/kubernetes-sigs/cloud-provider-kind
-loadbalancer.install: ## Install Load Balancer in kind cluster for Gateway deployments
-	docker run --rm --network kind --detach -v /var/run/docker.sock:/var/run/docker.sock registry.k8s.io/cloud-provider-kind/cloud-controller-manager:v0.6.0
+# Using the kubernetes sig tool https://github.com/kubernetes-sigs/cloud-provider-kind
+.PHONY: lb.install
+lb.install: lb.clean ## Install Load Balancer in kind cluster for Gateway deployments
+	docker run --rm --network kind --name kindccm --detach -v /var/run/docker.sock:/var/run/docker.sock registry.k8s.io/cloud-provider-kind/cloud-controller-manager:v0.6.0
+
+.PHONY: lb.clean
+lb.clean: ## Stops the Kind Cloud Container
+	docker stop kindccm && docker rm kindccm || true
 
 # example https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/refs/heads/release-1.2/config/crd/standard/gateway.networking.k8s.io_gateways.yaml
+.PHONY: gateway.install
 gateway.install: ## Install Gateway API CRDs in cluster 
 	kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/$(GW_VERSION)/config/crd/$(GW_CHANNEL)/gateway.networking.k8s.io_gatewayclasses.yaml
 	kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/$(GW_VERSION)/config/crd/$(GW_CHANNEL)/gateway.networking.k8s.io_gateways.yaml
