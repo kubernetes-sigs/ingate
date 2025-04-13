@@ -1,0 +1,13 @@
+apiVersion: v2
+name: ingate
+description: A Helm chart for InGate 
+type: application
+version: 0.1.0
+appVersion: 0.1.0
+sources:
+- https://github.com/kubernetes-sigs/ingate
+home: https://github.com/kubernetes-sigs/ingate
+maintainers:
+- name: Gacko
+- name: strongjz
+- name: tao12345666333

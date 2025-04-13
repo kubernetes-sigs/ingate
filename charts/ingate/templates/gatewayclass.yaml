@@ -1,0 +1,8 @@
+{{- if and .Values.deployDefaultGatewayClass }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: {{ include "ingate.fullname" . }}
+spec:
+  controllerName: "k8s.io/ingate"
+{{- end }}
