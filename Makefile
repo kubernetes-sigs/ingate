@@ -14,6 +14,7 @@
 
 # Add the following 'help' target to your Makefile
 # And add help text after each target name starting with '\#\#'
+
 .DEFAULT_GOAL:=help
 
 .EXPORT_ALL_VARIABLES:
@@ -24,6 +25,7 @@ endif
 
 # set default shell
 SHELL=/bin/bash -o pipefail -o errexit
+
 # Set Root Directory Path
 ifeq ($(origin ROOT_DIR),undefined)
 ROOT_DIR := $(abspath $(shell pwd -P))
@@ -206,3 +208,17 @@ gateway.install: ## Install Gateway API CRDs in cluster
 	kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/$(GW_VERSION)/config/crd/$(GW_CHANNEL)/gateway.networking.k8s.io_httproutes.yaml
 	kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/$(GW_VERSION)/config/crd/$(GW_CHANNEL)/gateway.networking.k8s.io_referencegrants.yaml
 	kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/$(GW_VERSION)/config/crd/$(GW_CHANNEL)/gateway.networking.k8s.io_grpcroutes.yaml
+
+
+help:  ## Display this help
+	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z0-9_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
+
+.PHONY: docs.build
+docs.build: ## Build and launch a local copy of the documentation website in http://localhost:8000
+	@docker build --no-cache -t ingate-docs -f tools/docs/Dockerfile .
+	@docker run --rm -it \
+		-p 8000:8000 \
+		-v ${PWD}:/docs \
+		--entrypoint /bin/bash   \
+		ingate-docs \
+		-c "mkdocs serve --dev-addr=0.0.0.0:8000"
