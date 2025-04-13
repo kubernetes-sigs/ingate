@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+         <loc>https://kubernetes-sigs.github.io/ingate/</loc>
+         <lastmod>2025-04-13</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://kubernetes-sigs.github.io/ingate/code-of-conduct/</loc>
+         <lastmod>2025-04-13</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://kubernetes-sigs.github.io/ingate/faq/</loc>
+         <lastmod>2025-04-13</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://kubernetes-sigs.github.io/ingate/contributing/contributing/</loc>
+         <lastmod>2025-04-13</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://kubernetes-sigs.github.io/ingate/contributing/ladder/</loc>
+         <lastmod>2025-04-13</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+</urlset>
