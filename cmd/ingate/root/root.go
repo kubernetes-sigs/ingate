@@ -26,7 +26,7 @@ func GetRootCommand() *cobra.Command {
 	c := &cobra.Command{
 		Use:   "ingate",
 		Short: "InGate Gateway and Ingress Controller",
-		Long:  "InGate is a kubernetes contoller for deploying and managing Gateway and Ingress resources",
+		Long:  "InGate is a kubernetes controller for deploying and managing Gateway and Ingress resources",
 	}
 
 	c.AddCommand(cmd.GetVersionCommand())
