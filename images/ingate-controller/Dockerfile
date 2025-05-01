@@ -1,4 +1,6 @@
-# Copyright 2025 The Kubernetes Authors. All rights reserved.
+#!/usr/bin/env bash
+
+# Copyright 2025 The Kubernetes Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,6 +16,6 @@
 
 FROM gcr.io/distroless/base-debian12:latest
 ARG TARGET_ARCH
-COPY  bin/${TARGET_ARCH}/ingate /opt/ingate
+COPY bin/"$TARGET_ARCH"/ingate /opt/ingate
 ENTRYPOINT ["/opt/ingate"]
-CMD ["/opt/ingate"]
+CMD ["start"]
