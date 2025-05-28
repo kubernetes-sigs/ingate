@@ -12,6 +12,7 @@ import (
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/klog/v2"
+	"os"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -60,6 +61,7 @@ func Start() error {
 		return fmt.Errorf("failed to construct InGate manager: %w", err)
 	}
 
+	ctrl.SetLogger(klog.Logger{})
 	log.SetLogger(klog.Logger{})
 	// Add health and readiness probes
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
@@ -83,12 +85,19 @@ func Start() error {
 	klog.Info("adding gateway controller")
 	// Create and Add Gateway reconciler to manager
 	newGateWayReconciler := NewGatewayReconciler(mgr)
-
 	err = newGateWayReconciler.SetupWithManager(mgr)
 	if err != nil {
 		return err
 	}
 
 	klog.Info("Starting InGate Manager")
-	return mgr.Start(ctrl.SetupSignalHandler())
+	//go func() {
+	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
+		klog.Errorf("problem running manager %s", err.Error())
+		os.Exit(1)
+	}
+	//}()
+	// Wait indefinitely or handle signals if needed
+	//select {}
+	return nil
 }

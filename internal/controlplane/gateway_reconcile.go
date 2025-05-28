@@ -48,7 +48,7 @@ func (r *GatewayReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	// Only manage GatewayClasses with our specific controllerName
 	gwc := &gatewayv1.GatewayClass{}
 	if err := r.Client.Get(ctx, client.ObjectKey{Name: string(gw.Spec.GatewayClassName)}, gwc); err != nil {
-		klog.Infof("gateway class not found in namespace %s ", req.NamespacedName)
+		klog.Infof("GatewayClassName does not match %s ", req.NamespacedName)
 		return reconcile.Result{}, nil
 	}
 

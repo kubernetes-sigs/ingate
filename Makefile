@@ -220,6 +220,9 @@ ingate.deploy:
 ingate.restart:
 	kubectl rollout restart -n ingate deployment ingate
 
+ingate.logs:
+	 kubectl logs -f -n ingate deployment/ingate -f
+
 .PHONY: docs.build
 docs.build: ## Build and launch a local copy of the documentation website in http://localhost:8000
 	@docker build --no-cache -t ingate-docs -f tools/docs/Dockerfile .
