@@ -37,6 +37,6 @@ func (r *GatewayClassReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&gatewayv1.GatewayClass{},
 			builder.WithPredicates(
 				predicate.NewPredicateFuncs(
-					MatchControllerName(inGateControllerName)))).
+					matchGWClassControllerName(inGateControllerName)))).
 		Complete(r)
 }

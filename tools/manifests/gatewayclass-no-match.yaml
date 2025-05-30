@@ -1,0 +1,7 @@
+
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: gwclass-does-not-match
+spec:
+  controllerName: "k8s.io/does-not-exist"

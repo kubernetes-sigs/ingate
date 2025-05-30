@@ -192,7 +192,7 @@ kind.load: ## Load InGate Image onto kind cluster
 .PHONY: kind.all
 kind.reload: export GOOS = linux
 kind.reload: export PLATFORMS = linux/$(ARCH)
-kind.reload: go.build docker.build kind.load ingate.deploy
+kind.reload: go.build docker.build kind.load ingate.deploy ingate.restart
 
 # Using the kubernetes sig tool https://github.com/kubernetes-sigs/cloud-provider-kind
 .PHONY: lb.install

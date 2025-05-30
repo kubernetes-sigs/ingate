@@ -17,11 +17,33 @@ limitations under the License.
 package controlplane
 
 import (
+	"context"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	gatewayv1 "sigs.k8s.io/gateway-api/apis/v1"
 )
 
-func MatchControllerName(controllerName string) func(object client.Object) bool {
+func matchGWControllerName(ctx context.Context, c client.Client, controllerName string) func(object client.Object) bool {
+	return func(obj client.Object) bool {
+
+		gw, ok := obj.(*gatewayv1.Gateway)
+		if !ok {
+			return false
+		}
+
+		gwc := &gatewayv1.GatewayClass{}
+		key := types.NamespacedName{Name: string(gw.Spec.GatewayClassName)}
+		if err := c.Get(ctx, key, gwc); err != nil {
+			klog.Errorf("Unable to get GatewayClass %s", err.Error())
+			return false
+		}
+
+		return string(gwc.Spec.ControllerName) == controllerName
+	}
+}
+
+func matchGWClassControllerName(controllerName string) func(object client.Object) bool {
 	return func(object client.Object) bool {
 		gwc, ok := object.(*gatewayv1.GatewayClass)
 		if !ok {

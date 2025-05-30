@@ -21,8 +21,10 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/v2"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	gatewayv1 "sigs.k8s.io/gateway-api/apis/v1"
 )
@@ -37,15 +39,12 @@ func NewGatewayReconciler(mgr ctrl.Manager) *GatewayReconciler {
 func (r *GatewayReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	klog.Info("setting up gateway controller")
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&gatewayv1.Gateway{}).
-		//builder.WithPredicates(predicate.NewPredicateFuncs(MatchControllerName(inGateControllerName)))).
+		For(&gatewayv1.Gateway{},
+			builder.WithPredicates(predicate.NewPredicateFuncs(matchGWControllerName(context.Background(), mgr.GetClient(), inGateControllerName)))).
 		// Watch GatewayClass resources, which are linked to Gateway
-		//Watches(&gatewayv1.GatewayClass{},
-		//	r.RetrieveGateClassResources(),
-		//	builder.WithPredicates(predicate.NewPredicateFuncs(func(object client.Object) bool {
-		//		klog.V(2).Infof("checking gateway class %s", object.GetName())
-		//		return object.(*gatewayv1.GatewayClass).Spec.ControllerName == inGateControllerName
-		//	}))).
+		Watches(&gatewayv1.GatewayClass{},
+			r.RetrieveGateClassResources(),
+			builder.WithPredicates(predicate.NewPredicateFuncs(matchGWClassControllerName(inGateControllerName)))).
 		Complete(r)
 }
 
