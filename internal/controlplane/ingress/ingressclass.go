@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package ingressclass
+package ingress
 
 const (
 	// IngressKey picks a specific "class" for the Ingress.

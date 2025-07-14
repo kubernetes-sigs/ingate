@@ -22,3 +22,9 @@ aliases:
 
   ingate-docs-maintainers:
   - longwuyuan
+
+  ingate-helm-maintainers:
+  - Gacko
+
+  ingate-helm-reviewers:
+  - Gacko

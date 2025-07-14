@@ -1,0 +1,132 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - "*"
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'images/**' # Images changes should be tested on their own workflow
+
+
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  changes:
+    name: changes
+    permissions:
+      contents: read  # for dorny/paths-filter to fetch a list of changed files
+      pull-requests: read  # for dorny/paths-filter to read pull requests
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+        id: filter
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          filters: |
+            go:
+              - '**/*.go'
+              - 'go.mod'
+              - 'go.sum'
+              - 'images/ingate-controller/*'
+              - 'versions/*'
+              
+            charts:
+              - 'charts/ingate/Chart.yaml'
+              - 'charts/ingate/**/*'
+            baseimage:
+              - 'images/ingate-controller/**'
+            docs:
+              - 'docs/*.md'
+
+  test-go:
+    name: test-go
+    runs-on: ubuntu-latest
+    needs: changes
+    if: |
+      (needs.changes.outputs.go == 'true')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Get go version
+        run: echo "GOLANG_VERSION=$(cat GOLANG_VERSION)" >> $GITHUB_ENV
+
+      - name: Set up Go
+        id: go
+        uses: actions/setup-go@41dfa10bad2bb2ae585af6ee5bb4d7d973ad74ed # v5.1.0
+        with:
+          go-version: ${{ env.GOLANG_VERSION }}
+          check-latest: true
+
+      - name: Run test
+        run: make go.test.unit
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: changes
+    outputs:
+      golangversion: ${{ steps.golangversion.outputs.version }}
+    if: |
+      (needs.changes.outputs.go == 'true') || (needs.changes.outputs.charts == 'true') || (needs.changes.outputs.baseimage == 'true')
+    env:
+      PLATFORMS: linux/amd64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Get go version
+        id: golangversion
+        run: |
+          echo "version=$(cat GOLANG_VERSION)" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Go
+        id: go
+        uses: actions/setup-go@41dfa10bad2bb2ae585af6ee5bb4d7d973ad74ed # v5.1.0
+        with:
+          go-version: ${{ steps.golangversion.outputs.version }}
+          check-latest: true
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@49b3bc8e6bdd4a60e6116a5414239cba5943d3cf # v3.2.0
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@c47758b77c9736f4b2ef4073d4d51994fabfe349 # v3.7.1
+        with:
+          version: latest
+
+      - name: Available platforms
+        run: echo ${{ steps.buildx.outputs.platforms }}
+
+      - name: Build images
+        env:
+          INGATE_VERSION: 1.0.0-dev
+          ARCH: amd64
+          GOOS: linux
+          PLATFORMS: linux/amd64
+          REGISTRY: gcr.io/k8s-staging/ingate
+        run: |
+          make docker.build
+          echo "creating images cache..."
+          docker save \
+          ${REGISTRY}/controller:${INGATE_VERSION} \
+          | gzip > docker.tar.gz
+
+      - name: cache
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        with:
+          name: docker.tar.gz
+          path: docker.tar.gz
+          retention-days: 5

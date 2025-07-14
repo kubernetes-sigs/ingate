@@ -17,8 +17,12 @@ limitations under the License.
 package cmd
 
 import (
-	"github.com/kubernetes-sigs/ingate/internal/cmd/version"
+
+	//external
 	"github.com/spf13/cobra"
+
+	//internal
+	"github.com/kubernetes-sigs/ingate/internal/cmd/version"
 )
 
 func GetVersionCommand() *cobra.Command {

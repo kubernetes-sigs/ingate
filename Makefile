@@ -57,11 +57,20 @@ BUILD_ID ?= "UNSET"
 # REGISTRY is the image registry to use for build and push image targets.
 REGISTRY ?= gcr.io/k8s-staging/ingate
 # Name of the image
-INGATE_IMAGE_NAME ?= ingate-controller
+INGATE_IMAGE_NAME ?= controller
 # IMAGE is the image URL for build and push image targets.
-IMAGE ?= $(REGISTRY)/$(IMAGE_NAME)
+IMAGE ?= $(REGISTRY)/$(INGATE_IMAGE_NAME)
 BASE_IMAGE ?= $(shell cat versions/BASE_IMAGE)
+# Where to place the golang built binaries
+TARGETS_DIR = "./images/ingate-controller/bin/${ARCH}"
 
+# Where to get the version information
+VERSION_PACKAGE = github.com/kubernetes-sigs/ingate/internal/cmd/version
+
+GOOS := $(shell go env GOOS)
+ifeq ($(origin GOOS), undefined)
+		GOOS := $(shell go env GOOS)
+endif
 
 .PHONY: help 
 help: ## help: Show this help info.
@@ -88,11 +97,11 @@ PLATFORMS ?= linux/amd64,linux/arm,linux/arm64
 .PHONY: docker.build
 docker.build: ## Build a local docker container for InGate
 	docker build \
-		--platform=$(PLATFORMS) \
+		--platform $(PLATFORMS) \
 		--no-cache \
 		--build-arg TARGET_ARCH=$(ARCH) \
 		-t $(REGISTRY)/controller:$(INGATE_VERSION) \
-		-f images/ingate-controller/Dockerfile.run images/ingate-controller
+		-f images/ingate-controller/Dockerfile images/ingate-controller
 
 .PHONY: docker.builder
 docker.builder: ## Create buildx for multi-platform builds
@@ -104,16 +113,15 @@ OUTPUT ?=
 
 .PHONY: docker.buildx
 docker.buildx: docker.builder docker.clean ## Build Ingate Controller image for a particular arch.
-	echo "Building docker $(REGISTRY)/controller:$(INGATE_VERSION) ($(ARCH))..."
+	echo "Building docker $(REGISTRY)/$(INGATE_IMAGE_NAME):$(INGATE_VERSION) ($(ARCH))..."
 	docker buildx build \
 		--builder $(BUILDER) \
 		--platform $(PLATFORMS) \
 		--no-cache \
 		--build-arg TARGET_ARCH=$(ARCH) \
-		-t $(REGISTRY)/controller:$(INGATE_VERSION) \
-		-f images/ingate-controller/Dockerfile.run images/ingate-controller \
+		-t $(REGISTRY)/$(INGATE_IMAGE_NAME):$(INGATE_VERSION) \
+		-f images/ingate-controller/Dockerfile images/ingate-controller \
 		$(OUTPUT)
-
 
 .PHONY: docker.push
 docker.push: OUTPUT = --push 
@@ -124,32 +132,17 @@ docker.clean: ## Removes local image
 	echo "removing old image $(REGISTRY)/controller:$(INGATE_VERSION)"
 	docker rmi -f $(REGISTRY)/controller:$(INGATE_VERSION) || true
 
-.PHONY: docker.registry
-docker.registry: ## Starts a local docker registry for testing
-	docker stop registry && docker rm registry || true
-	docker run -d --publish "0.0.0.0:6000:5000" --name registry registry:2.7
-
 # All Make targets for golang
-
-# Where to place the golang built binarys
-TARGETS_DIR = "./images/ingate-controller/bin/${ARCH}"
-
-# Where to get the version information 
-VERSION_PACKAGE = github.com/kubernetes-sigs/ingate/internal/cmd/version
-
-GOOS := $(shell go env GOOS)
-ifeq ($(origin GOOS), undefined)
-		GOOS := $(shell go env GOOS)
-endif
 
 .PHONY: go.build
 go.build: go.clean ## Go build for ingate controller
+	echo "Building ingate controller"
 	docker run \
 	--volume "${PWD}":/go/src/$(PKG) \
 	-w /go/src/$(PKG) \
 	-e CGO_ENABLED=0 \
 	-e GOOS=$(GOOS)  \
-	-e GOARCH=$(TARGETARCH) \
+	-e GOARCH=$(ARCH) \
 	golang:1.24.1-alpine3.21 \
 	 go build -trimpath -ldflags="-buildid= -w -s \
 	-X $(VERSION_PACKAGE).inGateVersion=$(INGATE_VERSION) \
@@ -163,7 +156,12 @@ go.clean: ## Clean go building output files
 
 .PHONY: go.test.unit
 go.test.unit: ## Run go unit tests
-	docker run -e CGO_ENABLED=1 golang:1.24.1-alpine3.21 go test -race ./...		
+	docker run \
+	--volume "${PWD}":/go/src/$(PKG) \
+	-w /go/src/$(PKG) \
+	-e CGO_ENABLED=0 \
+	golang:1.24.1-alpine3.21 \
+	go test -v ./...
 
 # All make targets for deploying a dev environment for InGate development
 
@@ -177,41 +175,58 @@ GW_VERSION ?= $(shell cat versions/GATEWAY_API)
 GW_CHANNEL ?= standard
 
 .PHONY: kind.all
-kind.all: kind.build go.build docker.build kind.load lb.install gateway.install ## Start a Development environment for InGate
+kind.all: export GOOS=linux
+kind.all: export PLATFORMS=linux/$(ARCH)
+kind.all: kind.build go.build docker.build kind.load lb.install gateway.install ingate.deploy ## Start a Development environment for InGate
 
 .PHONY: kind.build
 kind.build: kind.clean ## Build a kind cluster for testing InGate development
+	echo "Creating kind cluster ${KIND_CLUSTER_NAME}"
 	kind create cluster --config tools/kind/config.yaml --name $(KIND_CLUSTER_NAME) --image "kindest/node:$(K8S_VERSION)"
 
 .PHONY: kind.clean
 kind.clean: ## Deletes InGate-dev kind cluster 
+	echo "Deleting old kind cluster"
 	kind delete clusters $(KIND_CLUSTER_NAME) 
 
 .PHONY: kind.load
 kind.load: ## Load InGate Image onto kind cluster
-	kind load docker-image --name="$(KIND_CLUSTER_NAME)" "$(REGISTRY)"/controller:"$(INGATE_VERSION)"
+	echo "Loading Kind cluster with $(REGISTRY)/$(INGATE_IMAGE_NAME):$(INGATE_VERSION)"
+	kind load docker-image --name="$(KIND_CLUSTER_NAME)" "$(REGISTRY)"/"$(INGATE_IMAGE_NAME)":"$(INGATE_VERSION)"
+
+.PHONY: kind.all
+kind.reload: export GOOS=linux
+kind.reload: export PLATFORMS=linux/$(ARCH)
+kind.reload: go.build docker.build kind.load ingate.deploy ingate.restart
 
 # Using the kubernetes sig tool https://github.com/kubernetes-sigs/cloud-provider-kind
 .PHONY: lb.install
 lb.install: lb.clean ## Install Load Balancer in kind cluster for Gateway deployments
+	echo "Deploying Cloud Controller manager to the kind cluster"
 	docker run --rm --network kind --name kindccm --detach -v /var/run/docker.sock:/var/run/docker.sock registry.k8s.io/cloud-provider-kind/cloud-controller-manager:v0.6.0
 
 .PHONY: lb.clean
 lb.clean: ## Stops the Kind Cloud Container
+	echo "Cleaning up old Cloud controller manager"
 	docker stop kindccm && docker rm kindccm || true
 
 # example https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/refs/heads/release-1.2/config/crd/standard/gateway.networking.k8s.io_gateways.yaml
 .PHONY: gateway.install
 gateway.install: ## Install Gateway API CRDs in cluster 
+	echo "Installing Gateway API CRDs version ${GW_VERSION} onto kind cluster ${KIND_CLUSTER_NAME}"
 	kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/$(GW_VERSION)/config/crd/$(GW_CHANNEL)/gateway.networking.k8s.io_gatewayclasses.yaml
 	kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/$(GW_VERSION)/config/crd/$(GW_CHANNEL)/gateway.networking.k8s.io_gateways.yaml
 	kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/$(GW_VERSION)/config/crd/$(GW_CHANNEL)/gateway.networking.k8s.io_httproutes.yaml
-	kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/$(GW_VERSION)/config/crd/$(GW_CHANNEL)/gateway.networking.k8s.io_referencegrants.yaml
-	kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/$(GW_VERSION)/config/crd/$(GW_CHANNEL)/gateway.networking.k8s.io_grpcroutes.yaml
 
+ingate.deploy:
+	echo "Deploying Ingate Controller via helm"
+	helm upgrade -i ingate charts/ingate --namespace=ingate --create-namespace --set global.image.registry="$(REGISTRY)" --wait --debug --timeout=1m
 
-help:  ## Display this help
-	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z0-9_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
+ingate.restart:
+	kubectl rollout restart -n ingate deployment ingate
+
+ingate.logs:
+	 kubectl logs -f -n ingate deployment/ingate -f
 
 .PHONY: docs.build
 docs.build: ## Build and launch a local copy of the documentation website in http://localhost:8000
@@ -222,3 +237,11 @@ docs.build: ## Build and launch a local copy of the documentation website in htt
 		--entrypoint /bin/bash   \
 		ingate-docs \
 		-c "mkdocs serve --dev-addr=0.0.0.0:8000"
+
+.PHONY: misspell
+misspell:  ## Check for spelling errors.
+	@go install github.com/client9/misspell/cmd/misspell@latest
+	misspell \
+		-locale US \
+		-error \
+		cmd/* internal/* docs/* test/* charts/* README.md

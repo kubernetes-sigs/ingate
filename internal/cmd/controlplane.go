@@ -14,22 +14,35 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package root
+package cmd
 
 import (
-	"github.com/kubernetes-sigs/ingate/internal/cmd"
+	// builtin
+	"flag"
 
+	//external
 	"github.com/spf13/cobra"
+	"k8s.io/klog/v2"
+
+	//internal
+	"github.com/kubernetes-sigs/ingate/internal/controlplane"
 )
 
-func GetRootCommand() *cobra.Command {
-	c := &cobra.Command{
-		Use:   "ingate",
-		Short: "InGate Gateway and Ingress Controller",
-		Long:  "InGate is a kubernetes controller for deploying and managing Gateway and Ingress resources",
+func StartControlPlaneCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "start",
+		Aliases: []string{"start", "s"},
+		Short:   "Start InGate controller",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return controlplane.Start()
+		},
 	}
 
-	c.AddCommand(cmd.GetVersionCommand())
-	c.AddCommand(cmd.StartControlPlaneCommand())
-	return c
+	// Initialize klog flags
+	klog.InitFlags(nil)
+
+	// Add klog flags to Cobra
+	cmd.PersistentFlags().AddGoFlagSet(flag.CommandLine)
+
+	return cmd
 }

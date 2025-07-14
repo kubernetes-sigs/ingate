@@ -1,0 +1,10 @@
+# See the OWNERS docs: https://www.kubernetes.dev/docs/guide/owners
+
+approvers:
+- ingate-helm-maintainers
+
+reviewers:
+- ingate-helm-reviewers
+
+labels:
+- area/helm

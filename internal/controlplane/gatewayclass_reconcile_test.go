@@ -14,22 +14,4 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package root
-
-import (
-	"github.com/kubernetes-sigs/ingate/internal/cmd"
-
-	"github.com/spf13/cobra"
-)
-
-func GetRootCommand() *cobra.Command {
-	c := &cobra.Command{
-		Use:   "ingate",
-		Short: "InGate Gateway and Ingress Controller",
-		Long:  "InGate is a kubernetes controller for deploying and managing Gateway and Ingress resources",
-	}
-
-	c.AddCommand(cmd.GetVersionCommand())
-	c.AddCommand(cmd.StartControlPlaneCommand())
-	return c
-}
+package controlplane

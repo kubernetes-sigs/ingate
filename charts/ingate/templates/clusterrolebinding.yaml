@@ -1,6 +1,4 @@
-#!/usr/bin/env bash
-
-# Copyright 2025 The Kubernetes Authors.
+# Copyright 2025 The Kubernetes Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,9 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-# Exit on error.
-set -o errexit -o nounset -o pipefail
-
-# Get root.
-root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "ingate.fullname" . }}
+  labels:
+    {{ include "ingate.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "ingate.fullname" . }}
+subjects:
+- kind: ServiceAccount
+  name: {{ include "ingate.serviceAccountName" . }}
+  namespace: {{ include "ingate.namespace" . }}

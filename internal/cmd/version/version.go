@@ -17,6 +17,7 @@ limitations under the License.
 package version
 
 import (
+	// builtin
 	"fmt"
 	"io"
 	"runtime"
