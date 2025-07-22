@@ -276,4 +276,4 @@ lint.newlines: ## Check for files missing newlines at EOF
 	fi
 
 .PHONY: lint
-lint: lint.newlines
+lint: lint.newlines ## Run all lints
