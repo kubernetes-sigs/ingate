@@ -245,3 +245,35 @@ misspell:  ## Check for spelling errors.
 		-locale US \
 		-error \
 		cmd/* internal/* docs/* test/* charts/* README.md
+
+.PHONY: lint.newlines
+lint.newlines: ## Check for files missing newlines at EOF
+	@echo "lint: check new line at EOF"
+	@find . -type f \
+		\( -name "*.go" -o \
+		-name "*.yaml" -o \
+		-name "*.yml" -o \
+		-name "*.sh" -o \
+		-name "*.md" -o \
+		-name "*.txt" -o \
+		-name "*.py" -o \
+		-name "Dockerfile" -o \
+		-name "Makefile" \) \
+		-not -path "./.git/*" | \
+	while read file; do \
+		if [ -s "$$file" ] && [ "$$(tail -c1 "$$file" | wc -l)" -eq 0 ]; then \
+			echo "- $$file"; \
+		fi; \
+	done | \
+	if read line; then \
+		echo "Missing new lines in following file(s):"; \
+		echo "$$line"; \
+		while read line; do echo "$$line"; done; \
+		echo ""; \
+		exit 1; \
+	else \
+		echo "New line check is passed for all files."; \
+	fi
+
+.PHONY: lint
+lint: lint.newlines
