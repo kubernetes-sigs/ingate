@@ -17,9 +17,9 @@ limitations under the License.
 package controlplane
 
 import (
-	//builtin
+	// builtin
 	"context"
-	//external
+	// external
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/v2"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -31,15 +31,16 @@ import (
 	gatewayv1 "sigs.k8s.io/gateway-api/apis/v1"
 )
 
-func NewGatewayReconciler(ctx context.Context, mgr ctrl.Manager) *GatewayReconciler {
+// NewGatewayReconciler creates a new Gateway reconciler.
+func NewGatewayReconciler(_ context.Context, mgr ctrl.Manager) *GatewayReconciler {
 	return &GatewayReconciler{
 		Client: mgr.GetClient(),
 		scheme: mgr.GetScheme(),
 	}
 }
 
+// SetupWithManager configures the Gateway reconciler with the controller manager.
 func (r *GatewayReconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) error {
-
 	klog.Info("setting up gateway controller")
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&gatewayv1.Gateway{},
@@ -51,12 +52,12 @@ func (r *GatewayReconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manag
 		Complete(r)
 }
 
+// RetrieveGateClassResources returns an event handler for GatewayClass resource changes.
 func (r *GatewayReconciler) RetrieveGateClassResources() handler.EventHandler {
 	return handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, a client.Object) []reconcile.Request {
-
 		var reqs []reconcile.Request
 		gwList := &gatewayv1.GatewayList{}
-		if err := r.Client.List(ctx, gwList); err != nil {
+		if err := r.List(ctx, gwList); err != nil {
 			klog.Errorf("Unable to list Gateways %s", err)
 			return nil
 		}

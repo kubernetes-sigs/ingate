@@ -17,11 +17,12 @@ limitations under the License.
 package controlplane
 
 import (
-	//builtin
+	// builtin
 	"context"
+
 	"k8s.io/client-go/util/retry"
 
-	//external
+	// external
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -38,6 +39,7 @@ type GatewayReconciler struct {
 	scheme *runtime.Scheme
 }
 
+// Reconcile handles Gateway resource reconciliation.
 func (r *GatewayReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	var gw gatewayv1.Gateway
 
@@ -57,7 +59,7 @@ func (r *GatewayReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	klog.Infof("reconciling gateway %s", gw.Name)
 	// Only manage GatewayClasses with our specific controllerName
 	gwc := &gatewayv1.GatewayClass{}
-	if err := r.Client.Get(ctx, client.ObjectKey{Name: string(gw.Spec.GatewayClassName)}, gwc); err != nil {
+	if err := r.Get(ctx, client.ObjectKey{Name: string(gw.Spec.GatewayClassName)}, gwc); err != nil {
 		klog.Infof("GatewayClassName does not match %s ", req.NamespacedName)
 		return reconcile.Result{}, nil
 	}
@@ -102,7 +104,7 @@ func (r *GatewayReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 				klog.Warningf("failed to update gateway on retry %s", gwc.Name)
 				return reconcile.Result{}, err
 			}
-		} //end conflict loop
+		} // end conflict loop
 		return reconcile.Result{}, err
 	}
 
