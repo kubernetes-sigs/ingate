@@ -14,26 +14,28 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package cmd provides command-line interface commands for InGate.
 package cmd
 
 import (
 	// builtin
 	"flag"
 
-	//external
+	// external
 	"github.com/spf13/cobra"
 	"k8s.io/klog/v2"
 
-	//internal
+	// internal
 	"github.com/kubernetes-sigs/ingate/internal/controlplane"
 )
 
+// StartControlPlaneCommand returns a cobra command to start the InGate control plane.
 func StartControlPlaneCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "start",
 		Aliases: []string{"start", "s"},
 		Short:   "Start InGate controller",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			return controlplane.Start()
 		},
 	}

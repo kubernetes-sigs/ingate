@@ -20,7 +20,7 @@ import (
 	//
 	"context"
 
-	//external
+	// external
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -29,7 +29,6 @@ import (
 
 func matchGWControllerName(ctx context.Context, c client.Client, controllerName string) func(object client.Object) bool {
 	return func(obj client.Object) bool {
-
 		gw, ok := obj.(*gatewayv1.Gateway)
 		if !ok {
 			return false

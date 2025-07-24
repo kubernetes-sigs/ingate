@@ -17,11 +17,11 @@ limitations under the License.
 package controlplane
 
 import (
-	//builtin
+	// builtin
 	"context"
 	"testing"
 
-	//external
+	// external
 	"github.com/stretchr/testify/require"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -80,11 +80,10 @@ var noClass = &gatewayv1.Gateway{
 }
 
 func Test_Gateway_Reconciler(t *testing.T) {
-
 	scheme = runtime.NewScheme()
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
-	utilruntime.Must(gatewayv1.AddToScheme(scheme))
-	utilruntime.Must(gatewayv1beta1.AddToScheme(scheme))
+	utilruntime.Must(gatewayv1.Install(scheme))
+	utilruntime.Must(gatewayv1beta1.Install(scheme))
 
 	testClient := fake.NewClientBuilder().
 		WithScheme(scheme).WithObjects(valid, deleted, orphan, noClass).
@@ -96,7 +95,7 @@ func Test_Gateway_Reconciler(t *testing.T) {
 		scheme: scheme,
 	}
 
-	//valid gateway
+	// valid gateway
 	t.Run("valid gateway", func(t *testing.T) {
 		result, err := r.Reconcile(context.Background(), ctrl.Request{
 			NamespacedName: client.ObjectKey{
@@ -109,7 +108,7 @@ func Test_Gateway_Reconciler(t *testing.T) {
 		require.Equal(t, ctrl.Result{}, result)
 	})
 
-	//deleting gateway
+	// deleting gateway
 	t.Run("deleting gateway", func(t *testing.T) {
 		result, err := r.Reconcile(context.Background(), ctrl.Request{
 			NamespacedName: client.ObjectKey{
@@ -160,5 +159,4 @@ func Test_Gateway_Reconciler(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, ctrl.Result{}, result)
 	})
-
 }

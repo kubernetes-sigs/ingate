@@ -17,9 +17,9 @@ limitations under the License.
 package controlplane
 
 import (
-	//builtin
+	// builtin
 	"fmt"
-	//external
+	// external
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -30,24 +30,22 @@ import (
 	gatewayv1 "sigs.k8s.io/gateway-api/apis/v1"
 )
 
-var (
-	scheme = runtime.NewScheme()
-)
+var scheme = runtime.NewScheme()
 
 func init() {
 	// Register core Kubernetes types
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
 	// Register Gateway API types
-	utilruntime.Must(gatewayv1.AddToScheme(scheme))
+	utilruntime.Must(gatewayv1.Install(scheme))
 }
 
 const (
 	inGateControllerName = "k8s.io/ingate"
 )
 
+// Start initializes and starts the InGate controller manager.
 func Start() error {
-
 	logger := klog.NewKlogr()
 	ctrl.SetLogger(logger)
 
@@ -56,11 +54,11 @@ func Start() error {
 	// Create the ctrl runtime manager
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:                 scheme,  // All registered types
-		HealthProbeBindAddress: ":9000", //needs a flag
-		LeaderElection:         false,   //needs a flag
+		HealthProbeBindAddress: ":9000", // needs a flag
+		LeaderElection:         false,   // needs a flag
 		LeaderElectionID:       inGateControllerName,
 		Metrics: metricsserver.Options{
-			BindAddress: ":8080", //needs a flag
+			BindAddress: ":8080", // needs a flag
 		},
 	})
 	if err != nil {

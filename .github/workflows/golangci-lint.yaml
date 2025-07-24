@@ -30,6 +30,6 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@971e284b6050e8a5849b72094c50ab08da042db8 # v6.1.1
         with:
-          version: v1.64.8
+          version: v2.3.0
           # only-new-issues: true
           args: --config=./tools/linter/.golangci.yml

@@ -18,11 +18,12 @@ package controlplane
 
 import (
 
-	//builtin
+	// builtin
 	"context"
+
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 
-	//external
+	// external
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/klog/v2"
@@ -38,8 +39,8 @@ type GatewayClassReconciler struct {
 	scheme *runtime.Scheme
 }
 
+// Reconcile handles GatewayClass resource reconciliation.
 func (r *GatewayClassReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-
 	klog.Info("starting reconcile gateway class")
 	var gwc gatewayv1.GatewayClass
 
@@ -77,7 +78,6 @@ func (r *GatewayClassReconciler) Reconcile(ctx context.Context, req ctrl.Request
 
 	err := r.Status().Update(ctx, &gwc)
 	if err != nil {
-
 		if apierrors.IsNotFound(err) {
 			klog.Infof("gateway class %s not found", gwc.Name)
 			return reconcile.Result{}, err

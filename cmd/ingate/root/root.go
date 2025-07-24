@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package root provides the root command for the InGate CLI.
 package root
 
 import (
@@ -22,6 +23,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GetRootCommand returns the root cobra command for the InGate CLI.
 func GetRootCommand() *cobra.Command {
 	c := &cobra.Command{
 		Use:   "ingate",
