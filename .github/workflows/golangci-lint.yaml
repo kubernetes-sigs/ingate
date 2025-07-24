@@ -4,7 +4,7 @@ on:
   pull_request:
     paths:
       - '**/*.go'
-      - '.github/workflows/golangci-lint.yml'
+      - '.github/workflows/golangci-lint.yaml'
 
 permissions:
   contents: read
@@ -22,7 +22,7 @@ jobs:
 
       - name: Set up Go
         id: go
-        uses: actions/setup-go@41dfa10bad2bb2ae585af6ee5bb4d7d973ad74ed # v5.1.0
+        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
         with:
           go-version: ${{ env.GOLANG_VERSION }}
           check-latest: true
@@ -30,5 +30,6 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@971e284b6050e8a5849b72094c50ab08da042db8 # v6.1.1
         with:
-          version: v1.62
-          only-new-issues: true
+          version: v1.64.8
+          # only-new-issues: true
+          args: --config=./tools/linter/.golangci.yml
