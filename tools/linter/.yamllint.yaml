@@ -2,6 +2,7 @@
 
 ignore: |
   .github/
+  charts/*/templates/
 
 rules:
   braces:

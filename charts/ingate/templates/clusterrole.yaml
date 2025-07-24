@@ -15,8 +15,8 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   labels:
-    {{ include "ingate.labels" . | nindent 4 }}
-  name: {{ include "ingate.fullname" . }}
+    {{include "ingate.labels" . | nindent 4}}
+  name: {{include "ingate.fullname" .}}
 rules:
 - apiGroups:
   - ""
