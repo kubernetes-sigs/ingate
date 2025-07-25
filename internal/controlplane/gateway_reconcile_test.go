@@ -83,8 +83,8 @@ func Test_Gateway_Reconciler(t *testing.T) {
 
 	scheme = runtime.NewScheme()
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
-	utilruntime.Must(gatewayv1.AddToScheme(scheme))
-	utilruntime.Must(gatewayv1beta1.AddToScheme(scheme))
+	utilruntime.Must(gatewayv1.Install(scheme))
+	utilruntime.Must(gatewayv1beta1.Install(scheme))
 
 	testClient := fake.NewClientBuilder().
 		WithScheme(scheme).WithObjects(valid, deleted, orphan, noClass).

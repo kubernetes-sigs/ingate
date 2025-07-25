@@ -39,7 +39,7 @@ func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
 	// Register Gateway API types
-	utilruntime.Must(gatewayv1.AddToScheme(scheme))
+	utilruntime.Must(gatewayv1.Install(scheme))
 }
 
 const (
