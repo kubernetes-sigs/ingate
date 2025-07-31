@@ -17,17 +17,20 @@ limitations under the License.
 package controlplane
 
 import (
-	//builtin
 	"fmt"
-	//external
+
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/klog/v2"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/cache"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	gatewayv1 "sigs.k8s.io/gateway-api/apis/v1"
+
+	"github.com/kubernetes-sigs/ingate/internal/tunables"
 )
 
 var (
@@ -53,6 +56,8 @@ func Start() error {
 
 	ctx := ctrl.SetupSignalHandler()
 
+	transformFunc := tunables.NewTunables(logger, inGateControllerName)
+
 	// Create the ctrl runtime manager
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:                 scheme,  // All registered types
@@ -62,27 +67,35 @@ func Start() error {
 		Metrics: metricsserver.Options{
 			BindAddress: ":8080", //needs a flag
 		},
+		Cache: cache.Options{
+			Scheme: scheme,
+			ByObject: map[client.Object]cache.ByObject{
+				&gatewayv1.GatewayClass{}: {
+					Transform: transformFunc.TransformGatewayClass(),
+				},
+				&gatewayv1.Gateway{}: {
+					Transform: cache.TransformStripManagedFields(),
+				},
+			},
+		},
 	})
 	if err != nil {
-		klog.ErrorS(err, "failed to construct InGate manager")
+		logger.Error(err, "failed to construct InGate manager")
 		return fmt.Errorf("failed to construct InGate manager: %w", err)
 	}
 
 	// Add health and readiness probes
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
-		klog.ErrorS(err, "unable to set up health check")
+		logger.Error(err, "unable to set up health check")
 		return err
 	}
 	if err := mgr.AddReadyzCheck("readyz", healthz.Ping); err != nil {
-		klog.ErrorS(err, "unable to set up ready check")
+		logger.Error(err, "unable to set up ready check")
 		return err
 	}
 
-	klog.Info("adding gateway class controller")
-	// Create and Add Gateway Class reconciler to manager
-	newGateWayClassReconciler := NewGatewayClassReconciler(mgr)
-
-	err = newGateWayClassReconciler.SetupWithManager(ctx, mgr)
+	logger.Info("adding gateway class controller")
+	err = newGatewayClassReconciler(logger).SetupWithManager(ctx, mgr)
 	if err != nil {
 		return err
 	}

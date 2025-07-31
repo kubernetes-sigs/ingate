@@ -46,8 +46,7 @@ func (r *GatewayReconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manag
 			builder.WithPredicates(predicate.NewPredicateFuncs(matchGWControllerName(ctx, mgr.GetClient(), inGateControllerName)))).
 		// Watch GatewayClass resources, which are linked to Gateway
 		Watches(&gatewayv1.GatewayClass{},
-			r.RetrieveGateClassResources(),
-			builder.WithPredicates(predicate.NewPredicateFuncs(matchGWClassControllerName(inGateControllerName)))).
+			r.RetrieveGateClassResources()).
 		Complete(r)
 }
 

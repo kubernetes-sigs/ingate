@@ -18,27 +18,27 @@ package controlplane
 
 import (
 	"context"
-	//external
+
+	"github.com/go-logr/logr"
 	"k8s.io/klog/v2"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/builder"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	gatewayv1 "sigs.k8s.io/gateway-api/apis/v1"
 )
 
-func NewGatewayClassReconciler(mgr ctrl.Manager) *GatewayClassReconciler {
+func newGatewayClassReconciler(logger logr.Logger) *GatewayClassReconciler {
+	if logger.IsZero() {
+		logger = klog.NewKlogr()
+	}
 	return &GatewayClassReconciler{
-		Client: mgr.GetClient(),
-		scheme: mgr.GetScheme(),
+		logger: logger,
 	}
 }
 
 func (r *GatewayClassReconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) error {
-	klog.Info("setting up gateway class controller")
+	r.logger.Info("setting up gateway class controller")
+	r.Client = mgr.GetClient()
+	r.scheme = mgr.GetScheme()
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&gatewayv1.GatewayClass{},
-			builder.WithPredicates(
-				predicate.NewPredicateFuncs(
-					matchGWClassControllerName(inGateControllerName)))).
+		For(&gatewayv1.GatewayClass{}).
 		Complete(r)
 }

@@ -20,12 +20,11 @@ import (
 
 	//builtin
 	"context"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 
-	//external
+	"github.com/go-logr/logr"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/klog/v2"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -36,11 +35,12 @@ import (
 type GatewayClassReconciler struct {
 	client.Client
 	scheme *runtime.Scheme
+	logger logr.Logger
 }
 
 func (r *GatewayClassReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-
-	klog.Info("starting reconcile gateway class")
+	logger := r.logger.WithValues("class", req.Name)
+	logger.Info("starting reconcile gateway class")
 	var gwc gatewayv1.GatewayClass
 
 	if err := r.Get(ctx, req.NamespacedName, &gwc); err != nil {
@@ -48,16 +48,18 @@ func (r *GatewayClassReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		return reconcile.Result{}, client.IgnoreNotFound(err)
 	}
 
-	klog.Infof("reconciling gateway class %s", gwc.Name)
+	logger.Info("reconciling gateway class")
 	// Only manage GatewayClasses with our specific controllerName
+	// This should never happen, as we ignore/drop unmanaged classes
+	// on the client cache
 	if gwc.Spec.ControllerName != inGateControllerName {
-		klog.Infof("gateway class does not match controller %s/%s", gwc.Namespace, gwc.Name)
+		logger.Info("gateway class does not match controller")
 		return reconcile.Result{}, nil
 	}
 
 	// Gateway Class is being deleted
 	if gwc.GetDeletionTimestamp() != nil {
-		klog.Infof("gateway class is being deleted %s/%s", gwc.Namespace, gwc.Name)
+		logger.Info("gateway class is being deleted")
 		return reconcile.Result{}, nil
 	}
 
@@ -73,17 +75,17 @@ func (r *GatewayClassReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		},
 	}
 
-	klog.Infof("accepted gateway class %s", gwc.Name)
+	logger.Info("accepted gateway class")
 
 	err := r.Status().Update(ctx, &gwc)
 	if err != nil {
 
 		if apierrors.IsNotFound(err) {
-			klog.Infof("gateway class %s not found", gwc.Name)
+			logger.Info("gateway class not found")
 			return reconcile.Result{}, err
 		}
 		if apierrors.IsConflict(err) {
-			klog.Infof("gateway class %s conflicts, requeuing", gwc.Name)
+			logger.Info("gateway class conflicts, requeuing")
 			return reconcile.Result{Requeue: true}, err
 		}
 
