@@ -17,14 +17,9 @@
 
 .DEFAULT_GOAL:=help
 
-.EXPORT_ALL_VARIABLES:
-
 ifndef VERBOSE
 .SILENT:
 endif
-
-# set default shell
-SHELL=/bin/bash -o pipefail -o errexit
 
 # Set Root Directory Path
 ifeq ($(origin ROOT_DIR),undefined)
@@ -38,9 +33,7 @@ INGATE_VERSION=$(shell cat versions/INGATE)
 # Golang version to build controller and container
 GOLANG=$(shell cat versions/GOLANG)
 
-# HOST_ARCH is the architecture that the developer is using to build it
-HOST_ARCH=$(shell which go >/dev/null 2>&1 && go env GOARCH)
-ARCH ?= $(HOST_ARCH)
+ARCH ?= $(shell go env GOARCH)
 ifeq ($(ARCH),)
 	$(error mandatory variable ARCH is empty, either set it when calling the command or make sure 'go env GOARCH' works)
 endif
@@ -74,7 +67,7 @@ endif
 
 .PHONY: help 
 help: ## help: Show this help info.
-	@awk 'BEGIN {FS = ":.*##"; printf ""} /^[a-zA-Z_0-9-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
+	@awk 'BEGIN {FS = ":.*##"; printf ""} /^[a-zA-Z_0-9\-\.]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
 
 .PHONY: versions
@@ -97,7 +90,7 @@ PLATFORMS ?= linux/amd64,linux/arm,linux/arm64
 .PHONY: docker.build
 docker.build: ## Build a local docker container for InGate
 	docker build \
-		--platform $(PLATFORMS) \
+		--platform $(GOOS)/$(ARCH) \
 		--no-cache \
 		--build-arg TARGET_ARCH=$(ARCH) \
 		-t $(REGISTRY)/controller:$(INGATE_VERSION) \
@@ -166,7 +159,7 @@ go.test.unit: ## Run go unit tests
 # All make targets for deploying a dev environment for InGate development
 
 # Version of kubernetes to deploy on kind cluster
-K8S_VERSION ?= $(shell cat versions/KUBERNETES_VERSIONS | head -n1)
+K8S_VERSION ?= $(shell head -n1 versions/KUBERNETES_VERSIONS)
 # Name of kind cluster to deploy
 KIND_CLUSTER_NAME ?= ingate-dev
 # Gateway API Version to deploy on kind cluster

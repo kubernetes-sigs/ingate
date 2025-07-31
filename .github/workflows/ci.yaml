@@ -120,6 +120,7 @@ jobs:
           PLATFORMS: linux/amd64
           REGISTRY: gcr.io/k8s-staging/ingate
         run: |
+          make go.build
           make docker.build
           echo "creating images cache..."
           docker save \
