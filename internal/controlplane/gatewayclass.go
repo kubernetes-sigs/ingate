@@ -18,7 +18,7 @@ package controlplane
 
 import (
 	"context"
-	//external
+	// external
 	"k8s.io/klog/v2"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -26,6 +26,7 @@ import (
 	gatewayv1 "sigs.k8s.io/gateway-api/apis/v1"
 )
 
+// NewGatewayClassReconciler creates a new GatewayClass reconciler.
 func NewGatewayClassReconciler(mgr ctrl.Manager) *GatewayClassReconciler {
 	return &GatewayClassReconciler{
 		Client: mgr.GetClient(),
@@ -33,7 +34,8 @@ func NewGatewayClassReconciler(mgr ctrl.Manager) *GatewayClassReconciler {
 	}
 }
 
-func (r *GatewayClassReconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) error {
+// SetupWithManager configures the GatewayClass reconciler with the controller manager.
+func (r *GatewayClassReconciler) SetupWithManager(_ context.Context, mgr ctrl.Manager) error {
 	klog.Info("setting up gateway class controller")
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&gatewayv1.GatewayClass{},
