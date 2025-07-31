@@ -37,21 +37,13 @@ func matchGWControllerName(ctx context.Context, c client.Client, controllerName 
 
 		gwc := &gatewayv1.GatewayClass{}
 		key := types.NamespacedName{Name: string(gw.Spec.GatewayClassName)}
-		if err := c.Get(ctx, key, gwc); err != nil {
+		err := c.Get(ctx, key, gwc)
+		if client.IgnoreNotFound(err) != nil {
 			klog.Errorf("Unable to get GatewayClass %s", err.Error())
 			return false
 		}
 
-		return string(gwc.Spec.ControllerName) == controllerName
-	}
-}
-
-func matchGWClassControllerName(controllerName string) func(object client.Object) bool {
-	return func(object client.Object) bool {
-		gwc, ok := object.(*gatewayv1.GatewayClass)
-		if !ok {
-			return false
-		}
+		// If no class is found, controller name will be empty so this will be false
 		return string(gwc.Spec.ControllerName) == controllerName
 	}
 }
