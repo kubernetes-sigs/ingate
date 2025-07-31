@@ -33,7 +33,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	gatewayv1 "sigs.k8s.io/gateway-api/apis/v1"
-	gatewayv1beta1 "sigs.k8s.io/gateway-api/apis/v1beta1"
 )
 
 var valid = &gatewayv1.Gateway{
@@ -84,7 +83,6 @@ func Test_Gateway_Reconciler(t *testing.T) {
 	scheme = runtime.NewScheme()
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 	utilruntime.Must(gatewayv1.Install(scheme))
-	utilruntime.Must(gatewayv1beta1.Install(scheme))
 
 	testClient := fake.NewClientBuilder().
 		WithScheme(scheme).WithObjects(valid, deleted, orphan, noClass).
