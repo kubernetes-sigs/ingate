@@ -1,7 +1,6 @@
 module github.com/kubernetes-sigs/ingate
 
-go 1.24
-
+go 1.24.1
 require (
 	github.com/spf13/cobra v1.9.1
 	github.com/stretchr/testify v1.9.0

@@ -14,4 +14,5 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package gateway provides test fixtures and utilities for Gateway resources.
 package gateway
