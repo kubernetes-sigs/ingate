@@ -17,14 +17,11 @@ limitations under the License.
 package controlplane
 
 import (
-
-	//builtin
 	"context"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 
-	//external
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/util/retry"
 	"k8s.io/klog/v2"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -39,7 +36,6 @@ type GatewayClassReconciler struct {
 }
 
 func (r *GatewayClassReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-
 	klog.Info("starting reconcile gateway class")
 	var gwc gatewayv1.GatewayClass
 
@@ -50,45 +46,41 @@ func (r *GatewayClassReconciler) Reconcile(ctx context.Context, req ctrl.Request
 
 	klog.Infof("reconciling gateway class %s", gwc.Name)
 	// Only manage GatewayClasses with our specific controllerName
+	// We should never hit this condition as the predicate/client cache
+	// ignore Gateway Classes that we don't care
 	if gwc.Spec.ControllerName != inGateControllerName {
 		klog.Infof("gateway class does not match controller %s/%s", gwc.Namespace, gwc.Name)
 		return reconcile.Result{}, nil
 	}
 
 	// Gateway Class is being deleted
-	if gwc.GetDeletionTimestamp() != nil {
+	if !gwc.GetDeletionTimestamp().IsZero() {
 		klog.Infof("gateway class is being deleted %s/%s", gwc.Namespace, gwc.Name)
 		return reconcile.Result{}, nil
 	}
 
 	// Update status to GW Class Accepted True
-	gwc.Status.Conditions = []metav1.Condition{
-		{
-			Type:               string(gatewayv1.GatewayClassConditionStatusAccepted),
-			Status:             metav1.ConditionTrue,
-			Reason:             "Accepted",
-			Message:            "Gateway Class has been accepted by the InGate Controller.",
-			LastTransitionTime: metav1.Now(),
-			ObservedGeneration: gwc.GetGeneration(),
-		},
-	}
 
 	klog.Infof("accepted gateway class %s", gwc.Name)
 
-	err := r.Status().Update(ctx, &gwc)
-	if err != nil {
-
-		if apierrors.IsNotFound(err) {
-			klog.Infof("gateway class %s not found", gwc.Name)
-			return reconcile.Result{}, err
+	err := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
+		if err := r.Get(ctx, req.NamespacedName, &gwc); err != nil {
+			// Could not get GatewayClass (maybe deleted)
+			return client.IgnoreNotFound(err)
 		}
-		if apierrors.IsConflict(err) {
-			klog.Infof("gateway class %s conflicts, requeuing", gwc.Name)
-			return reconcile.Result{Requeue: true}, err
+		gwc.Status.Conditions = []metav1.Condition{
+			{
+				Type:               string(gatewayv1.GatewayClassConditionStatusAccepted),
+				Status:             metav1.ConditionTrue,
+				Reason:             "Accepted",
+				Message:            "Gateway Class has been accepted by the InGate Controller.",
+				LastTransitionTime: metav1.Now(),
+				ObservedGeneration: gwc.GetGeneration(),
+			},
 		}
 
-		return reconcile.Result{}, err
-	}
+		return r.Status().Update(ctx, &gwc)
+	})
 
-	return reconcile.Result{}, nil
+	return reconcile.Result{}, err
 }

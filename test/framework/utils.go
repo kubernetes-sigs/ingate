@@ -14,4 +14,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package controlplane
+package framework
+
+import (
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
+// GetConditionPerType iterates over an array of conditions to get the one we
+// are looking for.
+// It returns a pointer, so we can define when nothing has been found by checking if the
+// struct is null
+func GetConditionPerType(name string, conditions []metav1.Condition) *metav1.Condition {
+	for i := range conditions {
+		if conditions[i].Type == name {
+			return &conditions[i]
+		}
+	}
+
+	return nil
+}
