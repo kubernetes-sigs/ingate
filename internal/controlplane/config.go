@@ -14,4 +14,5 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package controlplane provides the core controller functionality for InGate.
 package controlplane

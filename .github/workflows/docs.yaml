@@ -21,6 +21,6 @@ jobs:
         uses: actions/checkout@v5.0.0
 
       - name: Deploy documentation
-        uses: mhausenblas/mkdocs-deploy-gh-pages@1.26
+        uses: mhausenblas/mkdocs-deploy-gh-pages@d77dd03172e96abbcdb081d8c948224762033653 # 1.26
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

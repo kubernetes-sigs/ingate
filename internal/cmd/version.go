@@ -18,20 +18,20 @@ package cmd
 
 import (
 
-	//external
+	// external
 	"github.com/spf13/cobra"
 
-	//internal
+	// internal
 	"github.com/kubernetes-sigs/ingate/internal/cmd/version"
 )
 
+// GetVersionCommand returns a cobra command to display version information.
 func GetVersionCommand() *cobra.Command {
-
 	cmd := &cobra.Command{
 		Use:     "version",
 		Aliases: []string{"versions", "v"},
 		Short:   "Show versions",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			return version.Print(cmd.OutOrStdout())
 		},
 	}
