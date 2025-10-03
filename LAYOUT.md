@@ -10,4 +10,3 @@ Code Layout for InGate project
 | charts | Helm chart for InGate deployment |
 | cmd | Command line for InGate | 
 | versions | Directory for versions of software InGate uses | 
-
