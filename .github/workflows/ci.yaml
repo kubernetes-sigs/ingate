@@ -133,3 +133,13 @@ jobs:
           name: docker.tar.gz
           path: docker.tar.gz
           retention-days: 5
+  
+  linelint:
+    runs-on: ubuntu-latest
+    name: Check if all files end in newline
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - name: Linelint
+        uses: actions/linelint@7907a5dca0c28ea7dd05c6d8d8cacded713aca11 # v0.0.6
+        id: linelint
