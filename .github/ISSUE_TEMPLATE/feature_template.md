@@ -22,6 +22,4 @@ Include any specific requirements
 
 **Describe your proposed solution you have in mind**
 
-Please complete this section if you have ideas on how to implement the feature. We strongly recommend discussing your approach with InGate maintainers before spending lots of time on your work. We want to work with you to get your idea into InGate! 
-
-
+Please complete this section if you have ideas on how to implement the feature. We strongly recommend discussing your approach with InGate maintainers before spending lots of time on your work. We want to work with you to get your idea into InGate!
