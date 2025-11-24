@@ -1,8 +1,12 @@
 # InGate
 
+> [!CAUTION]
+> InGate is being retired (early 2026).
+> SIG Network and the Security Response Committee recommend that all users begin migration to Gateway API or another Ingress controller immediately. Many options are listed in the Kubernetes documentation: [Gateway API](https://gateway-api.sigs.k8s.io/guides/) and [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/). Additional options may be available from vendors you work with.
+
 ## Overview
 
-InGate is an Ingress and Gateway API Controller for Kubernetes.
+[InGate was an Ingress and Gateway API Controller for Kubernetes](https://www.kubernetes.dev/blog/2025/11/12/ingress-nginx-retirement/#history-and-challenges).
 
 Learn more about [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress) and [Gateway API](https://kubernetes.io/docs/concepts/services-networking/gateway) on the Kubernetes documentation site.
 
@@ -10,12 +14,9 @@ Learn more about [Ingress](https://kubernetes.io/docs/concepts/services-networki
 
 ## Community, discussion, contribution, and support
 
-While we are in transition, we are still using the Ingress NGINX Slack channels and community meetings.
-
 - Read [`CONTRIBUTING.md`](CONTRIBUTING.md) for information about setting up your environment, the workflow that we expect, and instructions on the developer certificate of origin that we require.
 - Join our Kubernetes Slack channel for developer discussion: [#ingate-dev](https://kubernetes.slack.com/archives/C08EX6HD25B).
-- Submit GitHub issues for any feature enhancements, bugs, or documentation problems.
-- Open a [discussion](https://github.com/kubernetes-sigs/ingate/discussions) for ideas, announcements and other general topics folks would like to help direct the project.
+- Submit GitHub issues for documentation problems.
 
 ### Code of conduct
 
